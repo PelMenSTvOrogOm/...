@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ресторан "Из Варяг в Греки"</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <style>
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fdfaf4;
+            color: #2e2e2e;
+            line-height: 1.6;
+        }
+        header, nav, footer {
+            background-color: #b79b5b;
+            color: white;
+            padding: 1em;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            padding: 2em;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .menu-section {
+            margin-bottom: 3em;
+            border-bottom: 1px solid #e0d6c0;
+            padding-bottom: 2em;
+        }
+        .menu-section:last-child {
+            border-bottom: none;
+        }
+        .menu-section h3 {
+            color: #5e432a;
+            font-size: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .menu-section img {
+            max-width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        footer {
+            margin-top: 2em;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav a {
+                margin: 5px 0;
+            }
+            .language-switcher {
+                position: static;
+                margin-top: 10px;
+            }
+            .menu-section img {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ресторан "Из Варяг в Греки"</h1>
+        <div class="language-switcher">RU | EN</div>
+    </header>
+    
+    <nav>
+        <a href="#home">Главная</a>
+        <a href="#about">О ресторане</a>
+        <a href="#menu">Меню</a>
+        <a href="#team">Команда</a>
+        <a href="#contacts">Контакты</a>
+    </nav>
+    
+    <div class="container" id="home">
+        <h2>Путешествие во времени и вкусе</h2>
+        <p>Добро пожаловать в ресторан, где оживает история и раскрываются вкусы культур Восточной Европы.</p>
+    </div>
+    
+    <div class="container" id="about">
+        <h2>О ресторане</h2>
+        <p>Мы вдохновлены историческим торговым путём "из варяг в греки". Наша миссия — погружение в культуру и гастрономию региона, использование традиционных рецептов и местных продуктов.</p>
+    </div>
+    
+    <div class="container" id="menu">
+        <h2>Меню</h2>
+        <div id="menu-items"></div>
+    </div>
+    
+    <div class="container" id="team">
+        <h2>Наша команда</h2>
+        <p>Профессионалы своего дела, вдохновлённые историей и вкусом. Мы развиваемся, обучаемся и вместе создаём атмосферу путешествия.</p>
+    </div>
+    
+    <div class="container" id="contacts">
+        <h2>Контакты</h2>
+        <p><strong>Адрес:</strong> г. Минск, ул. Красноармейская 6</p>
+        <p><strong>Телефон:</strong> +375 XX XXX-XX-XX</p>
+        <div id="map"></div>
+    </div>
+    
+    <footer>
+        <p>© 2025 Ресторан "Из Варяг в Греки". Все права защищены.</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        // Данные меню с изображениями из папки images
+        const menuItems = [
+            { 
+                country: "Швеция", 
+                name: "Котбуллар", 
+                description: "Шведские фрикадельки с картофельным пюре и брусничным соусом",
+                image: "swedish_meatballs.jpg"
+            },
+            {
+                country: "Финляндия",
+                name: "Лохикейто",
+                description: "Традиционный сливочный суп с лососем и картофелем",
+                image: "finnish_soup.jpg"
+            },
+            {
+                country: "Эстония",
+                name: "Вериворст",
+                description: "Кровяная колбаса, подаётся с квашеной капустой и картофелем",
+                image: "estonian_sausage.jpg"
+            },
+            {
+                country: "Литва",
+                name: "Цеппелины",
+                description: "Картофельные клецки с мясной начинкой",
+                image: "lithuanian_zeppelins.jpg"
+            },
+            {
+                country: "Беларусь",
+                name: "Драники",
+                description: "Картофельные оладьи, подаются со сметаной",
+                image: "belarusian_pancakes.jpg"
+            },
+            {
+                country: "Россия",
+                name: "Борщ",
+                description: "Свекольный суп с говядиной, капустой и сметаной",
+                image: "russian_borscht.jpg"
+            },
+            {
+                country: "Украина",
+                name: "Вареники",
+                description: "Тесто с начинкой из картошки, вишни или творога",
+                image: "ukrainian_dumplings.jpg"
+            },
+            {
+                country: "Греция",
+                name: "Мусака",
+                description: "Запеканка с баклажанами, мясом и соусом бешамель",
+                image: "greek_moussaka.jpg"
+            }
+        ];
+
+        // Функция для загрузки меню
+        function loadMenu() {
+            const menuContainer = document.getElementById('menu-items');
+            
+            menuItems.forEach(item => {
+                const menuSection = document.createElement('div');
+                menuSection.className = 'menu-section';
+                
+                menuSection.innerHTML = `
+                    <h3>${item.country}</h3>
+                    <img src="images/${item.image}" alt="${item.name}" 
+                         onerror="this.src='images/default.jpg'" loading="lazy">
+                    <p><strong>${item.name}:</strong> ${item.description}</p>
+                `;
+                
+                menuContainer.appendChild(menuSection);
+            });
+        }
+
+        // Инициализация карты и загрузка меню
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMenu();
+            
+            var map = L.map('map').setView([53.899812, 27.566763], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            var marker = L.marker([53.899812, 27.566763]).addTo(map);
+            marker.bindPopup(`
+                <b>Ресторан "Из Варяг в Греки"</b><br>
+                г. Минск, ул. Красноармейская, 6<br><br>
+                🍽️ Уютный ресторан с европейской кухней<br>
+                🕒 Время работы: 11:00 – 23:00<br>
+                📞 Телефон: +375 XX XXX-XX-XX
+            `);
+            
+            // Плавная прокрутка
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
